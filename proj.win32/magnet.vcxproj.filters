@@ -1,0 +1,119 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="win32">
+      <UniqueIdentifier>{84a8ebd7-7cf0-47f6-b75e-d441df67da40}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="resource">
+      <UniqueIdentifier>{715254bc-d70b-4ec5-bf29-467dd3ace079}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src">
+      <UniqueIdentifier>{bb6c862e-70e9-49d9-81b7-3829a6f50471}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Object">
+      <UniqueIdentifier>{32de7ff5-6a1b-4e68-8786-4edd6a89df91}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Config">
+      <UniqueIdentifier>{d59567f8-6f50-42b7-86be-acaf101be702}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Scene">
+      <UniqueIdentifier>{f0868f07-78fd-44b0-bf5b-9c0fcaf7f66e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Scene\GamePlayScene">
+      <UniqueIdentifier>{2f500d45-361e-4c9a-ad62-613fe366d954}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Utils">
+      <UniqueIdentifier>{e51898e7-3d5b-4c56-95ef-b13f4b23c5c8}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Utils\Animation">
+      <UniqueIdentifier>{568bf12f-36a5-4bc8-8c2c-132f59719886}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Utils\Constants">
+      <UniqueIdentifier>{aadcb05f-12fe-4617-9d24-27fc371ee78d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Utils\BodyParser">
+      <UniqueIdentifier>{9027de8b-2330-45c1-8f77-3126d1a7d4d7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Utils\Parallax">
+      <UniqueIdentifier>{75360d61-1d89-4f29-94db-c68b7640212c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Utils\StringUtils">
+      <UniqueIdentifier>{edb3fb0a-bf88-4805-bfd9-84d7f2d03fb9}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\Utils\Abmob">
+      <UniqueIdentifier>{1aed1a0f-56a8-4a8a-8c7e-c44549f91abd}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp">
+      <Filter>win32</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\AppDelegate.cpp">
+      <Filter>src\Config</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\GamePlayScene.cpp">
+      <Filter>src\Scene\GamePlayScene</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Utils.cpp">
+      <Filter>src\Utils</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\MyAnimation.cpp">
+      <Filter>src\Utils\Animation</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\MagnetObject.cpp">
+      <Filter>src\Object</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\Constants.cpp">
+      <Filter>src\Utils\Constants</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\MyBodyParser.cpp">
+      <Filter>src\Utils\BodyParser</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\InfiniteParallaxNode.cpp">
+      <Filter>src\Utils\Parallax</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\AdmobHelper.cpp">
+      <Filter>src\Utils\Abmob</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="main.h">
+      <Filter>win32</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\AppDelegate.h">
+      <Filter>src\Config</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\GamePlayScene.h">
+      <Filter>src\Scene\GamePlayScene</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Utils.h">
+      <Filter>src\Utils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\MyAnimation.h">
+      <Filter>src\Utils\Animation</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\MagnetObject.h">
+      <Filter>src\Object</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\Constants.h">
+      <Filter>src\Utils\Constants</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\MyBodyParser.h">
+      <Filter>src\Utils\BodyParser</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\InfiniteParallaxNode.h">
+      <Filter>src\Utils\Parallax</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\MyStringUtils.h">
+      <Filter>src\Utils\StringUtils</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\AdmobHelper.h">
+      <Filter>src\Utils\Abmob</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="game.rc">
+      <Filter>resource</Filter>
+    </ResourceCompile>
+  </ItemGroup>
+</Project>

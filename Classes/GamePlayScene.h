@@ -86,6 +86,7 @@ public:
 	bool isPlayGame = false;
 	bool isStartGame = true; 
 	int isFirstPlayGame = 0;
+	bool isFirstEndGame = true;
 	bool isFirstCreate = true;
 	void updateMagnet(float dt);
 	ElectricState state = BALANCE;

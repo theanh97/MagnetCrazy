@@ -5,7 +5,7 @@
 USING_NS_CC;
 using namespace cocostudio::timeline;
 const char * APPACTIVITY = "org/cocos2dx/cpp/AppActivity";
-#if(CC_TARGET_PLATFORM== CC_PLATFORM_ANDROID   )
+#if(CC_TARGET_PLATFORM== CC_PLATFORM_ANDROID   || CC_TARGET_PLATFORM== CC_PLATFORM_WIN32 )
 #include"platform/android/jni/JniHelper.h"
 #include<jni.h>
 static short callGetBestScore() {
@@ -41,6 +41,59 @@ static short callGetGameGuideFlag() {
 	}
 	return -1;
 }
+
+static void callCreateTopTen() {
+	JniMethodInfo methodInfo;
+	if (cocos2d::JniHelper::getStaticMethodInfo(methodInfo, APPACTIVITY, "createTopTen", "()V")) {
+		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+	}
+	return;
+}
+
+static bool callIsConnection() {
+	JniMethodInfo methodInfo;
+	if (cocos2d::JniHelper::getStaticMethodInfo(methodInfo, APPACTIVITY, "isConnection", "()Z")) {
+		jboolean a = methodInfo.env->CallStaticBooleanMethod(methodInfo.classID, methodInfo.methodID);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+		bool result = a;
+		return result;
+	}
+	return false;
+}
+
+static void callUpdateTopTen(float newBestScore) {
+	JniMethodInfo methodInfo;
+	jfloat nbs = newBestScore;
+	if (cocos2d::JniHelper::getStaticMethodInfo(methodInfo, APPACTIVITY, "updateTopTen", "(F)V")) {
+		methodInfo.env->CallStaticVoidMethod(methodInfo.classID, methodInfo.methodID, nbs);
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+	}
+	return;
+}
+
+static float* callGetTopTen() {
+	JniMethodInfo methodInfo;
+	float a[10];
+	if (cocos2d::JniHelper::getStaticMethodInfo(methodInfo, APPACTIVITY, "getTopTen", "()[F")) {
+		jfloatArray arr = (jfloatArray)methodInfo.env->CallStaticObjectMethod(methodInfo.classID, methodInfo.methodID);
+		if (arr)
+		{
+			// get array values
+			jfloat *item = methodInfo.env->GetFloatArrayElements(arr, NULL);
+			for (int i = 0; i < 10; i++) {
+				jfloat ex = item[i];
+				a[i] = ex;
+				//log("value[%d] : %f", i,item[i]);
+			}
+
+			// release array values
+			methodInfo.env->ReleaseFloatArrayElements(arr, item, NULL);
+		}
+		methodInfo.env->DeleteLocalRef(methodInfo.classID);
+	}
+	return a;
+}
 #endif
 //jstring stringArg = methodInfo.env->NewStringUTF(msg);
 //methodInfo.env->DeleteLocalRef(stringArg);
@@ -54,11 +107,15 @@ bool GamePlayScene::init()
 
 	addSpriteFrameToCache();
 
+	cocos2d::log("LOG nek");
+
 	addPhysicWorldBox();
 
 	registerListener();
 
 	addGameScene();
+
+	CCLOG("First Play Game");
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
 	AdmobHelper::hideAd();
@@ -67,7 +124,8 @@ bool GamePlayScene::init()
 	if (isShowGameGuide == 1) {
 		isShowGameGuide++;
 		showFirstGameGuide();
-	}else 
+	}
+	else
 		showTapToPlay();
 #endif 
 	return true;
@@ -199,10 +257,6 @@ void GamePlayScene::addArrow()
 
 void GamePlayScene::gameOver()
 {
-
-	// show admob 
-	AdmobHelper::showAd();
-
 	isStartGame = false;
 	isPlayGame = false;
 
@@ -220,11 +274,39 @@ void GamePlayScene::gameOver()
 	}
 
 	// update score 
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID/* || CC_TARGET_PLATFORM == CC_PLATFORM_WIN32*/)
+	// --------------best score ( private ) -----------------
 	bsScore = (int)callGetBestScore();
 	if (score > bsScore) {
 		bsScore = score;
 		callSetBestScore((short)bsScore);
+	}
+
+	// --------------top 10  score ( public ) -------------------
+	bool isConnection = callIsConnection();
+	if (isConnection == true) {
+		// show admob 
+		AdmobHelper::showAd();
+
+		auto delay1 = DelayTime::create(1.0f);
+		auto delay2 = DelayTime::create(0.3f);
+		auto delay3 = DelayTime::create(0.3f);
+
+		CallFunc *create = CallFunc::create([&] {
+			callCreateTopTen();
+			log("create");
+		});
+
+		CallFunc *update = CallFunc::create([&] {
+			callUpdateTopTen((float)bsScore);
+			log("update");
+		});
+
+		CallFunc *get = CallFunc::create([&] {
+			callGetTopTen();
+			log("get");
+		});
+		this->runAction(Sequence::create(create, delay1, update, delay2, get, delay3, NULL));
 	}
 #endif 
 	currentScore->setString("Score : " + MyStringUtils::int_to_string(score));
@@ -234,7 +316,6 @@ void GamePlayScene::gameOver()
 	hideLoading(true);
 	hideArrow();
 	hideTabelScore(false);
-
 	magnet->setVisible(false);
 
 }
@@ -246,6 +327,7 @@ void GamePlayScene::exitGame()
 
 void GamePlayScene::replayGame()
 {
+	isFirstEndGame = true;
 
 	// admob 
 	AdmobHelper::hideAd();
@@ -336,7 +418,7 @@ void GamePlayScene::addTableScore()
 	buttonExit->addTouchEventListener([&](Ref* pSender, ui::Widget::TouchEventType type) {
 		if (type == ui::Widget::TouchEventType::ENDED)
 		{
-			CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("tap_menu.wav",false);
+			CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("tap_menu.wav", false);
 			exitGame();
 		}
 	});
@@ -592,7 +674,7 @@ void GamePlayScene::showFirstGameGuide()
 	auto Next = Sprite::create("arrow_next.png");
 	Next->setScale(0.1f);
 	Next->setTag(Constants::getInstance()->TAG_GUIDE_ARROW_NEXT);
-	Next->setPosition(Vec2(visibleSize.width/3 + 20, visibleSize.height / 2));
+	Next->setPosition(Vec2(visibleSize.width / 3 + 20, visibleSize.height / 2));
 	this->addChild(Next, Constants::getInstance()->ORDER_TEXT_SCORE);
 
 	auto imageView = ui::ImageView::create("magnet_1.png");
@@ -600,19 +682,19 @@ void GamePlayScene::showFirstGameGuide()
 	imageView->setScaleY(0.20f);
 
 	imageView->setTag(Constants::getInstance()->TAG_GUIDE_MAGNET);
-	imageView->setPosition(Vec2(visibleSize.width/2 + 80, visibleSize.height/2 + 80));
-	this->addChild(imageView,Constants::getInstance()->ORDER_MAGNET);
+	imageView->setPosition(Vec2(visibleSize.width / 2 + 80, visibleSize.height / 2 + 80));
+	this->addChild(imageView, Constants::getInstance()->ORDER_MAGNET);
 
 	auto tap = ui::ImageView::create("tap.png");
 	tap->setScale(0.5f);
 	tap->setTag(Constants::getInstance()->TAG_GUIDE_TAP_MOUSE);
-	tap->setPosition(Vec2(visibleSize.width / 2 , visibleSize.height / 2 - 180));
+	tap->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2 - 180));
 	this->addChild(tap, Constants::getInstance()->ORDER_MAGNET);
 
 	auto tapLeft = ui::ImageView::create("tap_left.png");
 	tapLeft->setScale(1.2f);
 	tapLeft->setTag(Constants::getInstance()->TAG_GUIDE_TAP_LEFT);
-	tapLeft->setPosition(Vec2(tap->getPosition().x - 60, tap->getPositionY() + tap->getContentSize().height/2 * 0.5));
+	tapLeft->setPosition(Vec2(tap->getPosition().x - 60, tap->getPositionY() + tap->getContentSize().height / 2 * 0.5));
 	this->addChild(tapLeft, Constants::getInstance()->ORDER_MAGNET);
 
 	auto tapRight = ui::ImageView::create("tap_right.png");
@@ -643,7 +725,7 @@ void GamePlayScene::showSecondGameGuide()
 	auto imageView = this->getChildByTag(Constants::getInstance()->TAG_GUIDE_MAGNET);
 	auto tap2Vach = this->getChildByTag(Constants::getInstance()->TAG_GUIDE_2_VACH);
 	tap2Vach->setRotation(15);
-	tap2Vach->setPosition(Vec2(imageView->getPosition().x - 30, imageView->getPositionY() +45));
+	tap2Vach->setPosition(Vec2(imageView->getPosition().x - 30, imageView->getPositionY() + 45));
 }
 
 void GamePlayScene::showTapToPlay()
@@ -651,7 +733,7 @@ void GamePlayScene::showTapToPlay()
 	auto tapToPlay = ui::ImageView::create("tap_to_play.png");
 	tapToPlay->setScale(0.7f);
 	tapToPlay->setTag(Constants::getInstance()->TAG_GUIDE_TAP_TO_PLAY);
-	tapToPlay->setPosition(Vec2(visibleSize.width/2 + 10, visibleSize.height / 2 + 100));
+	tapToPlay->setPosition(Vec2(visibleSize.width / 2 + 10, visibleSize.height / 2 + 100));
 	this->addChild(tapToPlay, Constants::getInstance()->ORDER_MAGNET);
 
 	auto tap = ui::ImageView::create("tap.png");
@@ -660,11 +742,11 @@ void GamePlayScene::showTapToPlay()
 	tap->setPosition(Vec2(visibleSize.width / 2, visibleSize.height / 2 - 140));
 	this->addChild(tap, Constants::getInstance()->ORDER_MAGNET);
 
-	auto tapLeft= ui::ImageView::create("tap_left.png"); 
+	auto tapLeft = ui::ImageView::create("tap_left.png");
 	tapLeft->setScale(1.2f);
 	tapLeft->setPosition(Vec2(tap->getPosition().x - 60, tap->getPositionY() + tap->getContentSize().height / 2 * 0.5));
 	tapLeft->setTag(Constants::getInstance()->TAG_GUIDE_TAP_LEFT);
-	this->addChild(tapLeft, Constants::getInstance()->ORDER_MAGNET); 
+	this->addChild(tapLeft, Constants::getInstance()->ORDER_MAGNET);
 
 	auto tapRight = ui::ImageView::create("tap_right.png");
 	tapRight->setScale(1.2f);
@@ -727,7 +809,10 @@ bool GamePlayScene::onCollisionLister(cocos2d::PhysicsContact & contact)
 						bodyB->getCollisionBitmask() == Constants::getInstance()->COLLISION_MAGNET) ||
 						(bodyB->getCollisionBitmask() == Constants::getInstance()->COLLISION_BOX &&
 							bodyA->getCollisionBitmask() == Constants::getInstance()->COLLISION_MAGNET)) {
-		gameOver();
+		if (isFirstEndGame) {
+			gameOver();
+			isFirstEndGame = false;
+		}
 	}
 	return true;
 }
@@ -737,12 +822,12 @@ bool GamePlayScene::onTouchBegan(cocos2d::Touch * touch, cocos2d::Event * event)
 	if (isShowGameGuide == 2) {
 		isShowGameGuide++;
 		showSecondGameGuide();
-		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("tap_menu.wav",false);
-		return true; 
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("tap_menu.wav", false);
+		return true;
 	}
 	else if (isShowGameGuide == 3) {
 		isShowGameGuide++;
-		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("tap_menu.wav",false);
+		CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("tap_menu.wav", false);
 		this->removeChildByTag(Constants::getInstance()->TAG_GUIDE_MAGNET, true);
 		this->removeChildByTag(Constants::getInstance()->TAG_GUIDE_2_VACH, true);
 		this->removeChildByTag(Constants::getInstance()->TAG_GUIDE_ARROW_DOWN, true);
@@ -758,7 +843,7 @@ bool GamePlayScene::onTouchBegan(cocos2d::Touch * touch, cocos2d::Event * event)
 	else {
 		isFirstPlayGame++;
 		if (isStartGame) {
-			CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("tap_screen.mp3",false);
+			CocosDenshion::SimpleAudioEngine::getInstance()->playEffect("tap_screen.mp3", false);
 			if (isPlayGame == false) {
 				hideTapToPlay();
 				isPlayGame = true;
@@ -769,8 +854,8 @@ bool GamePlayScene::onTouchBegan(cocos2d::Touch * touch, cocos2d::Event * event)
 					updateGameScene();
 			}
 			else {
-				auto animation = MyAnimation::getInstance()->createAnimate("magnet_%d.png", 2, 1.0f / 16); 
-				magnet->runAction(animation); 
+				auto animation = MyAnimation::getInstance()->createAnimate("magnet_%d.png", 2, 1.0f / 16);
+				magnet->runAction(animation);
 				if (magnet->getPositive() > 50) {
 					magnet->getPhysicsBody()->setVelocity(Vect(0, 0));
 					magnet->getPhysicsBody()->applyImpulse(Vect(0, 700));

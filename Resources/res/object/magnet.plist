@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple Computer//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+	<dict>
+		<key>frames</key>
+		<dict>
+			<key>magnet_1.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{0,0},{186,361}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{186,361}}</string>
+				<key>sourceSize</key>
+				<string>{186,361}</string>
+			</dict>
+
+			<key>magnet_2.png</key>
+			<dict>
+				<key>frame</key>
+				<string>{{187,0},{186,361}}</string>
+				<key>offset</key>
+				<string>{0,0}</string>
+				<key>rotated</key>
+				<false/>
+				<key>sourceColorRect</key>
+				<string>{{0,0},{186,361}}</string>
+				<key>sourceSize</key>
+				<string>{186,361}</string>
+			</dict>
+
+		</dict>
+
+		<key>metadata</key>
+		<dict>
+			<key>format</key>
+			<integer>2</integer>
+			<key>size</key>
+			<string>{512,512}</string>
+			<key>textureFileName</key>
+			<string>magnet.png</string>
+			</dict>
+		</dict>
+</plist>
